@@ -29,9 +29,18 @@ RUN chmod ugo+x /usr/bin/mender-artifact
 ARG MENDER_VERSION=none
 RUN if [ "$MENDER_VERSION" = none ]; then echo "MENDER_VERSION must be set!" 1>&2; exit 1; fi
 WORKDIR /tmp
-RUN curl -Lo mender-$MENDER_VERSION.zip https://github.com/mendersoftware/mender/archive/$MENDER_VERSION.zip
-RUN unzip mender-$MENDER_VERSION.zip
-RUN make -C /tmp/mender-$MENDER_VERSION install-modules-gen
+
+# Hack specifically for 2.0.0: directory-artifact-gen was lacking '--' option in
+# 2.0.0, which we need, so use 2.0.x.
+RUN if [ $MENDER_VERSION = 2.0.0 ]; then \
+    curl -Lo mender-2.0.x.zip https://github.com/mendersoftware/mender/archive/2.0.x.zip; \
+    unzip mender-2.0.x.zip; \
+    make -C /tmp/mender-2.0.x install-modules-gen; \
+else \
+    curl -Lo mender-$MENDER_VERSION.zip https://github.com/mendersoftware/mender/archive/$MENDER_VERSION.zip; \
+    unzip mender-$MENDER_VERSION.zip; \
+    make -C /tmp/mender-$MENDER_VERSION install-modules-gen; \
+fi
 
 COPY onboarding-site /var/www/localhost
 WORKDIR /var/www/localhost
