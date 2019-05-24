@@ -20,7 +20,7 @@ from mender_test_containers.conftest import *
 
 TEST_CONTAINER_LIST = [
     MenderTestRaspbian,
-    MenderTestQemux86_64,
+    #MenderTestQemux86_64,
 ]
 
 @pytest.fixture(scope="session", params=TEST_CONTAINER_LIST)
