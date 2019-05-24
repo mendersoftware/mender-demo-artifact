@@ -43,6 +43,15 @@ env:
         - DEPLOY_REPO=${DEPLOY_REPO_OVERRIDE:-$DEPLOY_REPO_DEFAULT}
         - BUILD_ARTIFACTS=${BUILD_ARTIFACTS_OVERRIDE:-$BUILD_ARTIFACTS_DEFAULT}
 
+        - MENDER_VERSION=2.0.0
+        - MENDER_ARTIFACT_VERSION=3.0.0
+        - ARTIFACT_NAME=mender-demo-artifact
+
+before_install:
+    - sudo apt update && sudo apt install -y python3-pip
+    - sudo pip3 install --upgrade setuptools
+    - sudo pip3 install --upgrade -r tests/requirements.txt
+
 before_script:
     # Print build info that binary is compiled with.
     - echo $TRAVIS_COMMIT
@@ -63,11 +72,22 @@ before_script:
 
 jobs:
   include:
-    - stage: Static code checks
+    - stage: Build and test
       script:
         # Check commit compliance.
         - git clone git://github.com/mendersoftware/mendertesting
         - mendertesting/check_commits.sh
+
+        # Build
+        - docker build -t mender-demo-artifact --build-arg MENDER_ARTIFACT_VERSION=$MENDER_ARTIFACT_VERSION --build-arg MENDER_VERSION=$MENDER_VERSION --build-arg ARTIFACT_NAME=$ARTIFACT_NAME .
+        # Extract artifact
+        - docker run --rm -v $PWD/output:/output mender-demo-artifact
+
+        # Build test image
+        - ( cd tests/mender_test_containers/docker/ && ./docker-build-raspbian )
+
+        # Tests
+        - ( cd tests && python3 -m pytest -v --mender-version $MENDER_VERSION )
 
 after_success:
     # Make build directory and copy all artifacts to this directory.
