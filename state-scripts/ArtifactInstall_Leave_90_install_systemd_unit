@@ -2,15 +2,47 @@
 
 set -e
 
-cat > /lib/systemd/system/mender-demo-artifact.service <<EOF
-[Install]
-WantedBy=multi-user.target
+if test ! -d /etc/init.d; then
+ mkdir -p /etc/init.d /etc/rc3.d
+fi
 
-[Service]
-Type=notify
-ExecStart=/data/www/localhost/entrypoint.sh
+cat > /etc/init.d/mender-demo-artifact <<"EOF"
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:		mender-demo-artifact
+# Default-Start:	2 3 4 5
+# Default-Stop:
+# Short-Description:	Mender Demo Artifact
+### END INIT INFO
+
+# /etc/init.d/mender-demo-artifact: start and stop the Mender Demo Artifact
+
+case "$1" in
+  start)
+    ( /data/www/localhost/entrypoint.sh < /dev/null >/dev/null 2>/dev/null 3>/dev/null & disown $!; ) &
+  ;;
+
+  stop)
+    kill -TERM `cat /var/run/mender-demo-artifact`
+    rm -f /var/run/mender-demo-artifact
+  ;;
+
+  *)
+    echo "Usage: /etc/init.d/mender-demo-artifact {start|stop}" || true
+    exit 1
+esac
+
+exit 0
 EOF
 
-systemctl daemon-reload
-systemctl restart mender-demo-artifact
-systemctl enable mender-demo-artifact
+chmod 755 /etc/init.d/mender-demo-artifact
+
+# r=`runlevel`
+# ${r#"${r%?}"}
+
+if test -d /etc/rc3.d; then
+ ln -s /etc/init.d/mender-demo-artifact /etc/rc3.d/S99mender-demo-artifact
+fi
+/etc/init.d/mender-demo-artifact start
+

@@ -59,7 +59,8 @@ class TestDemoArtifact():
                 key_filename=setup_test_container.key_filename)
             output = setup_tester_ssh_connection.sudo("mender-update install mender-demo-artifact.mender", warn=True)
             assert output.exited != 0
-            setup_tester_ssh_connection.run("! test -f /lib/systemd/system/mender-demo-artifact.service")
+            setup_tester_ssh_connection.run("! test -f /etc/init.d/mender-demo-artifact")
+            setup_tester_ssh_connection.run("! test -f /etc/rc3.d/S99mender-demo-artifact")
             output = setup_tester_ssh_connection.run("cat /data/www/localhost")
             assert output.stdout.strip() == "test_content"
 
@@ -88,5 +89,6 @@ class TestDemoArtifact():
 
     def test_rollback_demo_artifact(self, setup_test_container, setup_tester_ssh_connection):
         setup_tester_ssh_connection.sudo("mender-update rollback")
-        setup_tester_ssh_connection.run("! test -f /lib/systemd/system/mender-demo-artifact.service")
+        setup_tester_ssh_connection.run("! test -f /etc/init.d/mender-demo-artifact")
+        setup_tester_ssh_connection.run("! test -f /etc/rc3.d/S99mender-demo-artifact")
         self.check_valid_page(setup_test_container, setup_tester_ssh_connection, expect_fail=True)

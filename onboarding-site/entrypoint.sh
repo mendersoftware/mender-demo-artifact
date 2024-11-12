@@ -30,5 +30,5 @@ BUSYBOX_PID=$!
 # there's likely an error, and the kill will fail, which `set -e` will handle.
 sleep 3
 kill -0 $BUSYBOX_PID
-systemd-notify --ready || true
+echo "$BUSYBOX_PID" > /var/run/mender-demo-artifact
 wait $BUSYBOX_PID
