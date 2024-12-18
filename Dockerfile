@@ -63,6 +63,7 @@ RUN directory-artifact-gen \
     -t raspberrypi0w \
     -t raspberrypi0-wifi \
     -t raspberrypi3 \
+    -t raspberrypi3_64 \
     -t raspberrypi4 \
     -t raspberrypi4_64 \
     -t raspberrypi \
