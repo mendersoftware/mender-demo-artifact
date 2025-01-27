@@ -2,7 +2,17 @@
 
 # No 'set -e' here, proceed with everything.
 
-systemctl stop mender-demo-artifact
-systemctl disable mender-demo-artifact
-rm -f /lib/systemd/system/mender-demo-artifact.service
-systemctl daemon-reload
+if test -d /lib/systemd/system; then
+ if which systemctl 2>/dev/null >&2; then
+  if pidof systemd; then
+   systemctl stop mender-demo-artifact
+   systemctl disable mender-demo-artifact
+   rm -f /lib/systemd/system/mender-demo-artifact.service
+   systemctl daemon-reload
+   exit $?
+  fi
+ fi
+fi
+
+/etc/init.d/mender-demo-artifact stop
+rm -f /etc/init.d/mender-demo-artifact /etc/rc3.d/S99mender-demo-artifact
