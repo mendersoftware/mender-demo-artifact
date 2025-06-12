@@ -7,8 +7,6 @@ updates:
     schedule:
       interval: monthly
       day: saturday
-    reviewers:
-      - "mendersoftware/qa-dependabot-reviewers"
   - commit-message:
       prefix: chore
     directory: /
@@ -16,8 +14,6 @@ updates:
     schedule:
       interval: monthly
       day: saturday
-    reviewers:
-      - "mendersoftware/qa-dependabot-reviewers"
   - commit-message:
       prefix: chore
     directory: /
@@ -25,5 +21,3 @@ updates:
     schedule:
       interval: monthly
       day: saturday
-    reviewers:
-      - "mendersoftware/qa-dependabot-reviewers"
