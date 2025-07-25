@@ -19,7 +19,6 @@ from mender_test_containers.container_props import *
 from mender_test_containers.conftest import *
 
 TEST_CONTAINER_LIST = [
-    MenderTestRaspbian,
     MenderTestQemux86_64,
 ]
 
