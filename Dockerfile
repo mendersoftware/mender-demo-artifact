@@ -1,44 +1,35 @@
-FROM debian:12
-RUN apt update && apt install -y build-essential gcc-arm-linux-gnueabi gcc-aarch64-linux-gnu curl unzip cmake
+FROM debian:13
+RUN apt update && apt install -y build-essential curl unzip cmake
 
-WORKDIR /tmp
-RUN curl -f -O https://busybox.net/downloads/busybox-1.36.1.tar.bz2
-RUN tar xjf busybox-1.36.1.tar.bz2
-WORKDIR /tmp/busybox-1.36.1
+## x86_64
+RUN apt install -y busybox
+RUN cp /usr/bin/busybox /tmp/busybox_x86_64
 
-# x86_64
-RUN make distclean
-RUN make -j$(nproc) defconfig
-RUN make -j$(nproc)
-RUN cp busybox /tmp/busybox_x86_64
+# Add architectures
+RUN dpkg --add-architecture arm64
+RUN dpkg --add-architecture armhf
+RUN apt update -y
 
-# ARM 32 bits
-RUN make distclean
-RUN env CROSS_COMPILE=arm-linux-gnueabi- LDFLAGS=-static make -j$(nproc) defconfig
-RUN env CROSS_COMPILE=arm-linux-gnueabi- LDFLAGS=-static make -j$(nproc)
-RUN cp busybox /tmp/busybox_armhf
+## ARM 64 bits
+RUN apt install -y busybox:arm64
+RUN cp /usr/bin/busybox /tmp/busybox_arm64
 
-# ARM 64 bits
-RUN make distclean
-RUN env CROSS_COMPILE=aarch64-linux-gnu- LDFLAGS=-static make -j$(nproc) defconfig
-RUN env CROSS_COMPILE=aarch64-linux-gnu- LDFLAGS=-static make -j$(nproc)
-RUN cp busybox /tmp/busybox_arm64
+## ARM 32 bits
+RUN apt install -y busybox:armhf
+RUN cp /usr/bin/busybox /tmp/busybox_armhf
 
 ARG MENDER_ARTIFACT_VERSION=none
 RUN if [ "$MENDER_ARTIFACT_VERSION" = none ]; then echo "MENDER_ARTIFACT_VERSION must be set!" 1>&2; exit 1; fi
-RUN curl -f -O https://downloads.mender.io/repos/debian/pool/main/m/mender-artifact/mender-artifact_$MENDER_ARTIFACT_VERSION-1+debian+$(. /etc/os-release; echo $VERSION_CODENAME)_amd64.deb
-RUN dpkg --install mender-artifact_$MENDER_ARTIFACT_VERSION-1+debian+$(. /etc/os-release; echo $VERSION_CODENAME)_amd64.deb
+RUN curl -f -O https://downloads.mender.io/repos/workstation-tools/pool/main/m/mender-artifact/mender-artifact_$MENDER_ARTIFACT_VERSION-1+debian+$(. /etc/os-release; echo $VERSION_CODENAME)_amd64.deb
+RUN apt install -y ./mender-artifact_$MENDER_ARTIFACT_VERSION-1+debian+$(. /etc/os-release; echo $VERSION_CODENAME)_amd64.deb
 
 ARG MENDER_VERSION=none
 RUN if [ "$MENDER_VERSION" = none ]; then echo "MENDER_VERSION must be set!" 1>&2; exit 1; fi
 WORKDIR /tmp
 
-# NOTE: the sed command below can be removed when upgrading to newer debian version. See:
-# https://github.com/mendersoftware/mender/pull/1556
 RUN curl -Lo $MENDER_VERSION.zip https://github.com/mendersoftware/mender/archive/${MENDER_VERSION}.zip; \
     unzip $MENDER_VERSION.zip; \
     cmake -S /tmp/mender-$MENDER_VERSION -B /tmp/mender-$MENDER_VERSION -D MENDER_NO_BUILD=1 || true; \
-    sed -i 's|component=|component |g' /tmp/mender-$MENDER_VERSION/support/CMakeLists.txt || true; \
     make -C /tmp/mender-$MENDER_VERSION install-modules-gen;
 
 COPY onboarding-site /data/www/localhost
