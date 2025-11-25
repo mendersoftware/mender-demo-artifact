@@ -57,6 +57,8 @@ RUN directory-artifact-gen \
     -t raspberrypi3_64 \
     -t raspberrypi4 \
     -t raspberrypi4_64 \
+    -t raspberrypi5 \
+    -t raspberrypi5_64 \
     -t raspberrypi \
     -d /data/www/localhost \
     -o mender-demo-artifact.mender \
