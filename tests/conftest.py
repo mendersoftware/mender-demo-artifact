@@ -28,12 +28,7 @@ def setup_test_container_props(request):
 
 def pytest_addoption(parser):
     parser.addoption("--mender-version", required=True)
-    parser.addoption("--mender-deb-version", required=True)
 
 @pytest.fixture(scope="session")
 def mender_version(request):
     return request.config.getoption("--mender-version")
-
-@pytest.fixture(scope="session")
-def mender_deb_version(request):
-    return request.config.getoption("--mender-deb-version")

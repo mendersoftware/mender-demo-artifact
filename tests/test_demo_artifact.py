@@ -21,7 +21,6 @@ import requests
 from mender_test_containers.helpers import *
 
 # The tests in this class need to be run in order.
-@pytest.mark.usefixtures("setup_mender_configured")
 class TestDemoArtifact():
     def check_valid_page(self, setup_test_container, setup_tester_ssh_connection, expect_fail=False):
         attempts = 10

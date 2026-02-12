@@ -7,7 +7,6 @@ variables:
   MENDER_ARTIFACT_VERSION: '4.1.1'
   INTEGRATION_VERSION: '3.8.3'
   ARTIFACT_NAME: mender-demo-artifact-$INTEGRATION_VERSION
-  MENDER_DEB_VERSION: '5.0.3'
   S3_BUCKET_NAME: "mender-demo-artifacts"
 
 stages:
@@ -72,7 +71,7 @@ test:acceptance:
     - pip3 install --break-system-packages --upgrade pip
     - cd tests
     - pip3 install --break-system-packages -r requirements.txt
-    - python3 -m pytest -v --mender-version $MENDER_VERSION --mender-deb-version $MENDER_DEB_VERSION
+    - python3 -m pytest -v --mender-version $MENDER_VERSION
 
 publish:s3:
   stage: publish
