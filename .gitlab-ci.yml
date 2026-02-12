@@ -4,8 +4,6 @@ variables:
   GITHUB_RELEASE_DEPLOY_REPO: mendersoftware/mender-demo-artifact
   MENDER_CLIENT_TAG_VERSION: '5.0.3'
   MENDER_ARTIFACT_VERSION: '4.1.1'
-  INTEGRATION_VERSION: '3.8.3'
-  ARTIFACT_NAME: mender-demo-artifact-$INTEGRATION_VERSION
   S3_BUCKET_NAME: "mender-demo-artifacts"
 
 stages:
@@ -25,13 +23,17 @@ build:
   services:
     - docker:dind
   script:
+    - ARTIFACT_NAME="mender-demo-artifact-$(date +%Y%m%d)-$(git rev-parse --short HEAD)"
     - docker build -t mender-demo-artifact --build-arg MENDER_ARTIFACT_VERSION=$MENDER_ARTIFACT_VERSION --build-arg MENDER_VERSION=$MENDER_CLIENT_TAG_VERSION --build-arg ARTIFACT_NAME=$ARTIFACT_NAME .
     # Extract artifact
     - mkdir output
     - docker run --rm -v $PWD/output:/output mender-demo-artifact
+    - echo "ARTIFACT_NAME=$ARTIFACT_NAME" > build.env
   artifacts:
     paths:
       - output/mender-demo-artifact.mender
+    reports:
+      dotenv: build.env
 
 test:acceptance:
   stage: test
@@ -80,14 +82,14 @@ publish:s3:
   before_script:
     - apt update && apt install -yyq awscli
   script:
-    - echo "Publishing ${INTEGRATION_VERSION} version to S3"
+    - echo "Publishing ${ARTIFACT_NAME} version to S3"
     - aws s3 cp output/mender-demo-artifact.mender
         s3://$S3_BUCKET_NAME/mender-demo-artifact.mender
     - aws s3api put-object-acl --acl public-read --bucket $S3_BUCKET_NAME
         --key mender-demo-artifact.mender
     - aws s3 cp output/mender-demo-artifact.mender
-        s3://$S3_BUCKET_NAME/$INTEGRATION_VERSION/mender-demo-artifact.mender
+        s3://$S3_BUCKET_NAME/$ARTIFACT_NAME/mender-demo-artifact.mender
     - aws s3api put-object-acl --acl public-read --bucket $S3_BUCKET_NAME
-        --key $INTEGRATION_VERSION/mender-demo-artifact.mender
+        --key $ARTIFACT_NAME/mender-demo-artifact.mender
   only:
     - master
