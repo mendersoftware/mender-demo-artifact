@@ -2,7 +2,6 @@ variables:
   REPO_NAME: github.com/mendersoftware/mender-demo-artifact
   GITHUB_RELEASE_BINARY: mender-demo-artifact
   GITHUB_RELEASE_DEPLOY_REPO: mendersoftware/mender-demo-artifact
-  MENDER_CLIENT_TAG_VERSION: '5.0.3'
   MENDER_ARTIFACT_VERSION: '4.1.1'
   S3_BUCKET_NAME: "mender-demo-artifacts"
 
@@ -24,7 +23,7 @@ build:
     - docker:dind
   script:
     - ARTIFACT_NAME="mender-demo-artifact-$(date +%Y%m%d)-$(git rev-parse --short HEAD)"
-    - docker build -t mender-demo-artifact --build-arg MENDER_ARTIFACT_VERSION=$MENDER_ARTIFACT_VERSION --build-arg MENDER_VERSION=$MENDER_CLIENT_TAG_VERSION --build-arg ARTIFACT_NAME=$ARTIFACT_NAME .
+    - docker build -t mender-demo-artifact --build-arg MENDER_ARTIFACT_VERSION=$MENDER_ARTIFACT_VERSION --build-arg ARTIFACT_NAME=$ARTIFACT_NAME .
     # Extract artifact
     - mkdir output
     - docker run --rm -v $PWD/output:/output mender-demo-artifact

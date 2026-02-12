@@ -23,8 +23,7 @@ RUN if [ "$MENDER_ARTIFACT_VERSION" = none ]; then echo "MENDER_ARTIFACT_VERSION
 RUN curl -f -O https://downloads.mender.io/repos/workstation-tools/pool/main/m/mender-artifact/mender-artifact_$MENDER_ARTIFACT_VERSION-1+debian+$(. /etc/os-release; echo $VERSION_CODENAME)_amd64.deb
 RUN apt install -y ./mender-artifact_$MENDER_ARTIFACT_VERSION-1+debian+$(. /etc/os-release; echo $VERSION_CODENAME)_amd64.deb
 
-ARG MENDER_VERSION=none
-RUN if [ "$MENDER_VERSION" = none ]; then echo "MENDER_VERSION must be set!" 1>&2; exit 1; fi
+ENV MENDER_VERSION=master
 WORKDIR /tmp
 
 RUN curl -Lo $MENDER_VERSION.zip https://github.com/mendersoftware/mender/archive/${MENDER_VERSION}.zip; \
