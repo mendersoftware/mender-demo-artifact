@@ -74,9 +74,7 @@ RUN directory-artifact-gen \
 RUN state-scripts/ArtifactInstall_Leave_50_choose_busybox_arch
 
 VOLUME /output
-CMD echo "Copying artifact to /output." \
-    && cp /tmp/mender-demo-artifact.mender /output \
-    && chown --reference=/output /output/mender-demo-artifact.mender
+CMD ["sh", "-c", "echo 'Copying artifact to /output.' && cp /tmp/mender-demo-artifact.mender /output && chown --reference=/output /output/mender-demo-artifact.mender"]
 
 EXPOSE 80
 
