@@ -66,7 +66,7 @@ RUN directory-artifact-gen \
     -- \
     --software-filesystem data-partition \
     --software-name mender-demo-artifact \
-    --software-version ${MENDER_VERSION} \
+    --software-version ${MENDER_ARTIFACT_VERSION} \
     -s state-scripts/ArtifactInstall_Leave_50_choose_busybox_arch \
     -s state-scripts/ArtifactInstall_Leave_90_install_systemd_unit \
     -s state-scripts/ArtifactRollback_Enter_00_remove_systemd_unit
