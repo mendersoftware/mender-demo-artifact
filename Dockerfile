@@ -23,8 +23,7 @@ RUN if [ "$MENDER_ARTIFACT_VERSION" = none ]; then echo "MENDER_ARTIFACT_VERSION
 RUN curl -f -O https://downloads.mender.io/repos/workstation-tools/pool/main/m/mender-artifact/mender-artifact_$MENDER_ARTIFACT_VERSION-1+debian+$(. /etc/os-release; echo $VERSION_CODENAME)_amd64.deb
 RUN apt install -y ./mender-artifact_$MENDER_ARTIFACT_VERSION-1+debian+$(. /etc/os-release; echo $VERSION_CODENAME)_amd64.deb
 
-ARG MENDER_VERSION=none
-RUN if [ "$MENDER_VERSION" = none ]; then echo "MENDER_VERSION must be set!" 1>&2; exit 1; fi
+ENV MENDER_VERSION=master
 WORKDIR /tmp
 
 RUN curl -Lo $MENDER_VERSION.zip https://github.com/mendersoftware/mender/archive/${MENDER_VERSION}.zip; \
@@ -66,7 +65,7 @@ RUN directory-artifact-gen \
     -- \
     --software-filesystem data-partition \
     --software-name mender-demo-artifact \
-    --software-version ${MENDER_VERSION} \
+    --software-version ${MENDER_ARTIFACT_VERSION} \
     -s state-scripts/ArtifactInstall_Leave_50_choose_busybox_arch \
     -s state-scripts/ArtifactInstall_Leave_90_install_systemd_unit \
     -s state-scripts/ArtifactRollback_Enter_00_remove_systemd_unit
@@ -75,9 +74,7 @@ RUN directory-artifact-gen \
 RUN state-scripts/ArtifactInstall_Leave_50_choose_busybox_arch
 
 VOLUME /output
-CMD echo "Copying artifact to /output." \
-    && cp /tmp/mender-demo-artifact.mender /output \
-    && chown --reference=/output /output/mender-demo-artifact.mender
+CMD ["sh", "-c", "echo 'Copying artifact to /output.' && cp /tmp/mender-demo-artifact.mender /output && chown --reference=/output /output/mender-demo-artifact.mender"]
 
 EXPOSE 80
 
