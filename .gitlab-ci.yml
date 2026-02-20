@@ -4,6 +4,18 @@ variables:
   GITHUB_RELEASE_DEPLOY_REPO: mendersoftware/mender-demo-artifact
   MENDER_ARTIFACT_VERSION: '4.1.1'
   S3_BUCKET_NAME: "mender-demo-artifacts"
+  DOCKER_HOST:
+    value: 'tcp://docker:2376'
+    description: "Required to run dind inside k8s runners with TLS"
+  DOCKER_TLS_CERTDIR:
+    value: '/certs'
+    description: "The cert dir inside the gitlab runner. Don't change this."
+  DOCKER_TLS_VERIFY:
+    value: 1
+    description: "Enable TLS verification for docker in dind"
+  DOCKER_CERT_PATH:
+    value: "$DOCKER_TLS_CERTDIR/client"
+    description: "Used for docker entrypoints. See https://gitlab.com/gitlab-org/gitlab-runner/-/issues/4125"
 
 stages:
   - build
@@ -11,16 +23,25 @@ stages:
   - publish
 
 include:
+  - project: Northern.tech/Mender/mendertesting
+    file:
+      - qa-common/runner.yml
+      - qa-common/retry.yml
   - project: 'Northern.tech/Mender/mendertesting'
     file: '.gitlab-ci-check-commits-signoffs.yml'
   - project: 'Northern.tech/Mender/mendertesting'
     file: '.gitlab-ci-github-status-updates.yml'
 
+default:
+  tags: !reference [.qa-common-default-runner, tags]
+  retry: !reference [.qa-common-default-retry, retry]
+
 build:
   stage: build
   image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/docker:28.5.2
   services:
-    - docker:dind
+    - name: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/docker:dind
+      alias: docker
   script:
     - ARTIFACT_NAME="mender-demo-artifact-$(date +%Y%m%d)-$(git rev-parse --short HEAD)"
     - docker build -t mender-demo-artifact --build-arg MENDER_ARTIFACT_VERSION=$MENDER_ARTIFACT_VERSION --build-arg ARTIFACT_NAME=$ARTIFACT_NAME .
@@ -79,6 +100,7 @@ publish:s3:
   dependencies:
     - build
   before_script:
+    - !reference [.qa-common-network-apt-retry, before_script]
     - apt update && apt install -yyq awscli
   script:
     - echo "Publishing ${ARTIFACT_NAME} version to S3"
