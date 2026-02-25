@@ -31,6 +31,9 @@ include:
     file: '.gitlab-ci-check-commits-signoffs.yml'
   - project: 'Northern.tech/Mender/mendertesting'
     file: '.gitlab-ci-github-status-updates.yml'
+  - project: "Northern.tech/Mender/mendertesting"
+    file: "qa-common/send-results-to-mantra.yml"
+    ref: "master"
 
 default:
   tags: !reference [.qa-common-default-runner, tags]
@@ -92,7 +95,17 @@ test:acceptance:
     - pip3 install --break-system-packages --upgrade pip
     - cd tests
     - pip3 install --break-system-packages -r requirements.txt
-    - python3 -m pytest -v
+    - python3 -m pytest --verbose --junitxml=results.xml
+  after_script:
+    - MANTRA_PROJECT_NAME: "full_integration"
+    - !reference [.mantra-push-results]
+￼ artifacts:
+    expire_in: 2w
+    when: always
+  ￼ paths:
+      - results.xml
+  ￼ reports:
+      junit: results.xml
 
 publish:s3:
   stage: publish
