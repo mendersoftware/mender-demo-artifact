@@ -2,7 +2,7 @@ variables:
   REPO_NAME: github.com/mendersoftware/mender-demo-artifact
   GITHUB_RELEASE_BINARY: mender-demo-artifact
   GITHUB_RELEASE_DEPLOY_REPO: mendersoftware/mender-demo-artifact
-  MENDER_ARTIFACT_VERSION: '4.1.1'
+  MENDER_ARTIFACT_VERSION: '4.4.0'
   S3_BUCKET_NAME: "mender-demo-artifacts"
   DOCKER_HOST:
     value: 'tcp://docker:2376'
