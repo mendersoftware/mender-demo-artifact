@@ -48,6 +48,8 @@ build:
   services:
     - name: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/docker:dind
       alias: docker
+  before_script:
+    - !reference [.qa-common-wait-for-dind, before_script]
   script:
     - ARTIFACT_NAME="mender-demo-artifact-$(date +%Y%m%d)-$(git rev-parse --short HEAD)"
     - docker build -t mender-demo-artifact --build-arg MENDER_ARTIFACT_VERSION=$MENDER_ARTIFACT_VERSION --build-arg ARTIFACT_NAME=$ARTIFACT_NAME .
