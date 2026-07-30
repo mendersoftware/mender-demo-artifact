@@ -110,6 +110,9 @@ publish:s3:
   image: debian:bookworm
   dependencies:
     - build
+  id_tokens:
+    AWS_OIDC_TOKEN:
+      aud: https://gitlab.com
   before_script:
     - !reference [.qa-common-network-apt-retry, before_script]
     - apt update && apt install -yyq awscli
