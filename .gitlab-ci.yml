@@ -103,7 +103,7 @@ test:acceptance:
 
 publish:s3:
   stage: publish
-  image: debian:bookworm
+  image: debian:trixie
   dependencies:
     - build
   id_tokens:
